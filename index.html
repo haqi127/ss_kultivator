@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swallowed Star - Kebangkitan Kultivator</title>
+    <style>
+        /* Menggunakan Background Gambar Swallowed Star */
+        body {
+            font-family: 'Montserrat', 'Segoe UI', sans-serif;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), 
+                              url('https://images.unsplash.com/photo-1633164227069-df58d5f183df?q=80&w=1332&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'); /* Gambar bertema SS */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #e9e9e9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: rgba(16, 20, 35, 0.9); /* Transparan gelap */
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(78, 204, 163, 0.3);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #0f3460;
+            backdrop-filter: blur(5px);
+        }
+
+        h1 { color: #f8b500; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 0.5rem; }
+        .sub-title { color: #4ecca3; font-size: 0.9rem; margin-bottom: 2rem; }
+
+        .input-group { margin-bottom: 1.2rem; text-align: left; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #4ecca3; }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #0f3460;
+            background-color: #0d1117;
+            color: white;
+            box-sizing: border-box; /* Penting agar padding tidak merusak lebar */
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #f8b500;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #e94560;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        button:hover { 
+            background-color: #ff2e63; 
+            box-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+        }
+
+        /* Area Hasil */
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 2px solid #f8b500;
+            display: none; /* Tersembunyi di awal */
+            animation: fadeIn 0.5s;
+        }
+
+        .result-name { font-size: 1.4rem; color: white; margin-bottom: 10px; }
+        .rank-text { font-size: 1.8rem; font-weight: bold; color: #f8b500; display: block; text-shadow: 0 0 5px rgba(248, 181, 0, 0.5); }
+        .level-text { font-size: 2.5rem; color: #4ecca3; font-weight: 900; }
+        .desc-text { font-style: italic; color: #bbb; margin-top: 15px; font-size: 0.9rem; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>HRD DOJO LIMITLESS</h1>
+    <div class="sub-title">Sistem Penentuan Bakat Genetika Manusia</div>
+
+    <div class="input-group">
+        <label for="userName">Nama Calon Kultivator:</label>
+        <input type="text" id="userName" placeholder="Contoh: Luo Feng Jr." autocomplete="off">
+    </div>
+
+    <div class="input-group">
+        <label for="userWeapon">Senjata Pilihan (Menentukan Tipe):</label>
+        <select id="userWeapon">
+            <option value="" disabled selected>Pilih Senjata...</option>
+            <option value="khopesh">Flying Blades (Spirit Reader)</option>
+            <option value="spear">Long Spear (Agility Fighter)</option>
+            <option value="hammer">Giant Hammer (Strength Fighter)</option>
+            <option value="shield">Heavy Shield (Defender)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label for="userAttribute">Atribut Genetik Dominan:</label>
+        <select id="userAttribute">
+            <option value="" disabled selected>Pilih Atribut...</option>
+            <option value="mental">Kekuatan Mental (Willpower)</option>
+            <option value="vitality">Vitalitas Tubuh (Cell Growth)</option>
+            <option value="lightning">Elemen Petir (Speed)</option>
+            <option value="space">Paham Ruang (Space Comprehension)</option>
+        </select>
+    </div>
+
+    <button onclick="calculateRank()">Analisis Bakat Genetik</button>
+
+    <div id="result">
+        <div class="result-name" id="resName"></div>
+        <div>Telah Diidentifikasi Sebagai:</div>
+        <span class="rank-text" id="resRank"></span>
+        <span class="level-text" id="resLevel"></span>
+        <div class="desc-text" id="resDesc"></div>
+    </div>
+</div>
+
+<script>
+    function calculateRank() {
+        // 1. Ambil Input
+        const name = document.getElementById('userName').value;
+        const weapon = document.getElementById('userWeapon').value;
+        const attribute = document.getElementById('userAttribute').value;
+        const resultDiv = document.getElementById('result');
+
+        // 2. Validasi
+        if (!name || !weapon || !attribute) {
+            alert("Rekan Tao, mohon isi Nama, Senjata, dan Atribut untuk memulai analisis!");
+            return;
+        }
+
+        // 3. Logika Penentuan Ranah (Bukan Acak Murni)
+        // Kita gunakan sistem poin internal
+        let powerScore = 0;
+
+        // Poin dari Senjata (Tipe)
+        if (weapon === 'khopesh') powerScore += 10; // Spirit Reader biasanya OP
+        if (weapon === 'spear') powerScore += 7;
+        if (weapon === 'hammer') powerScore += 6;
+        if (weapon === 'shield') powerScore += 5;
+
+        // Poin dari Atribut
+        if (attribute === 'space') powerScore += 15; // Paham ruang itu tingkat tinggi
+        if (attribute === 'mental') powerScore += 10;
+        if (attribute === 'lightning') powerScore += 8;
+        if (attribute === 'vitality') powerScore += 6;
+
+        // Tambahkan sedikit faktor keberuntungan (1-10)
+        powerScore += Math.floor(Math.random() * 10) + 1;
+
+        // 4. Penentuan Ranah Berdasarkan Poin
+        let finalRank = "";
+        let finalDesc = "";
+
+        if (powerScore <= 12) {
+            finalRank = "Apprentice (Xuétú)";
+            finalDesc = "Kamu baru saja membangkitkan energi genetik. Masih perlu banyak berlatih di Bumi.";
+        } else if (powerScore <= 18) {
+            finalRank = "Planetary (Xíngxīng)";
+            finalDesc = "Selamat! Kamu bisa terbang dan dianggap sebagai pejuang elit di Bumi.";
+        } else if (powerScore <= 24) {
+            finalRank = "Stellar (Héngxīng)";
+            finalDesc = "Tubuhmu adalah sistem bintang mini. Kamu siap menjelajahi galaksi Bima Sakti.";
+        } else if (powerScore <= 30) {
+            finalRank = "Universe (Yǔzhòu)";
+            finalDesc = "Kamu adalah raksasa di ruang angkasa, mampu bertahan hidup di hampa udara tanpa alat.";
+        } else {
+            // Skor Tertinggi
+            if (weapon === 'khopesh' && attribute === 'space') {
+                finalRank = "Domain Master (Yùzhǔ)";
+                finalDesc = "Luar Biasa! Bakat Spirit Reader dan pemahaman Ruangmu membuatmu menjadi penguasa satu sektor bintang.";
+            } else {
+                finalRank = "Universe (Peak)";
+                finalDesc = "Bakatmu sangat tinggi, hampir menyentuh level Domain Master.";
+            }
+        }
+
+        // 5. Pilih Level 1-9 Secara Acak
+        const randomLevel = Math.floor(Math.random() * 9) + 1;
+
+        // 6. Update HTML
+        document.getElementById('resName').innerText = `Rekan Tao ${name}`;
+        document.getElementById('resRank').innerText = finalRank;
+        document.getElementById('resLevel').innerText = `Tingkat ${randomLevel}`;
+        document.getElementById('resDesc').innerText = finalDesc;
+        
+        // Tampilkan Box Hasil
+        resultDiv.style.display = 'block';
+        // Scroll otomatis ke hasil (untuk HP)
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
